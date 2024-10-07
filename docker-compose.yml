@@ -1,0 +1,40 @@
+version: '3.4'
+
+services:
+  ordering.api:
+    image: ${DOCKER_REGISTRY-}orderingapi
+    build:
+      context: .
+      dockerfile: src/Ordering.Api/Dockerfile
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+    depends_on:
+      - rabbitmq
+  stock.api:
+    image: ${DOCKER_REGISTRY-}stockapi
+    build:
+      context: .
+      dockerfile: src/Stock.Api/Dockerfile
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
+    depends_on:
+      - rabbitmq
+  rabbitmq:
+    image: "rabbitmq:3.8.14-management"
+    container_name: rabbitmq
+    ports:
+        - 15671:15671
+        - 15672:15672
+        - 15691:15691
+        - 15692:15692
+        - 25672:25672
+        - 4369:4369
+        - 5671:5671
+        - 5672:5672
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - 4317:4317
+      - 4318:4318
+      - 16686:16686
